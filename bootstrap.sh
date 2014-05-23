@@ -14,7 +14,7 @@ echo "####################################"
 echo "Installing base packages........"
 echo "####################################"
 apt-get -y install g++ python-dev zlib1g-dev libssl-dev libcurl4-openssl-dev libsasl2-modules python-setuptools libsasl2-dev make daemon
-apt-get -y install build-essential python-dev libevent-dev python-pip libssl-dev liblzma-dev libffi-dev redis-server
+apt-get -y install build-essential python-dev libevent-dev python-pip libssl-dev liblzma-dev libffi-dev redis-server unzip
 apt-get -y install curl wget git-core mlocate tree
 
 #Install Java & Maven
@@ -40,6 +40,7 @@ echo "####################################"
 echo deb http://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list
 apt-get -y update
 apt-get -y --force-yes install lxc-docker
+service docker restart
 
 #Install Docker registry
 echo "####################################"
@@ -52,7 +53,8 @@ cd ..
 mv docker-registry /usr/local/docker-registry
 mkdir /var/log/docker-registry
 cp vagrant_docker_registry/docker_registry/docker-registry.conf /etc/init/docker-registry.conf
-service docker_registry restart
+cp /usr/local/docker-registry/config/config_sample.yml  /usr/local/docker-registry/config/config.yml
+service docker-registry restart
 
 #Install Pyelasticsearch
 echo "####################################"
@@ -109,6 +111,7 @@ cp vagrant_docker_registry/nginx/nginx.conf /etc/nginx/nginx.conf
 rm -rf /etc/nginx/sites-available
 cp -rf vagrant_docker_registry/nginx/sites-available /etc/nginx/sites-available/
 update-rc.d nginx defaults
+/etc/init.d/nginx restart
 
 # echo "####################################"
 # echo "Rebooting........"
