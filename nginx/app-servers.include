@@ -1,0 +1,17 @@
+#Docker registry
+upstream backend1 {
+    ip_hash;
+	server docker1:5000;
+}
+
+#Elasticsearch
+upstream backend2 {
+    ip_hash;
+	server docker1:9200;
+}
+
+#Solr
+upstream backend3 {
+   ip_hash;
+   server docker1:8080;
+}
