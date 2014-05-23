@@ -30,8 +30,8 @@ echo "#######################################################################"
 echo "Cloning https://github.com/ahunnargikar/vagrant_docker_registry........"
 echo "#######################################################################"
 git clone https://github.com/ahunnargikar/vagrant_docker_registry
-cd vagrant_docker_registry
-cd ..
+pwd
+ls -l
 
 #Install Docker
 echo "####################################"
@@ -46,14 +46,13 @@ echo "####################################"
 echo "Installing Docker registry........"
 echo "####################################"
 git clone https://github.com/dotcloud/docker-registry.git
-cd /usr/local/docker-registry
+cd docker-registry
 pip install .
 cd ..
 mv docker-registry /usr/local/docker-registry
 mkdir /var/log/docker-registry
 cp vagrant_docker_registry/docker_registry/docker-registry.conf /etc/init/docker-registry.conf
 service docker_registry restart
-cd /home
 
 #Install Pyelasticsearch
 echo "####################################"
