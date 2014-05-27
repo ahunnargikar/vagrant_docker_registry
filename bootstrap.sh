@@ -14,8 +14,10 @@ echo "####################################"
 echo "Installing base packages........"
 echo "####################################"
 apt-get -y install g++ python-dev zlib1g-dev libssl-dev libcurl4-openssl-dev libsasl2-modules python-setuptools libsasl2-dev make daemon
-apt-get -y install build-essential python-dev libevent-dev python-pip libssl-dev liblzma-dev libffi-dev redis-server unzip
-apt-get -y install curl wget git-core mlocate tree
+apt-get -y install build-essential python-dev libevent-dev python-pip libssl-dev liblzma-dev libffi-dev redis-server python-novaclient
+apt-get -y install curl wget git-core mlocate tree unzip 
+cd /usr/local/lib/python2.7/dist-packages/
+rm -rf docker_registry*
 
 #Install Java & Maven
 echo "####################################"
@@ -42,18 +44,26 @@ apt-get -y update
 apt-get -y --force-yes install lxc-docker
 service docker restart
 
+#Installing backend search modules
+echo "##########################################"
+echo "Installing registry search modules........"
+echo "##########################################"
+cp -rf vagrant_docker_registry/modules/elasticsearchindex /usr/local/lib/python2.7/dist-packages/elasticsearchindex
+cp -rf vagrant_docker_registry/modules/solrindex /usr/local/lib/python2.7/dist-packages/solrindex
+
 #Install Docker registry
 echo "####################################"
 echo "Installing Docker registry........"
 echo "####################################"
 git clone https://github.com/dotcloud/docker-registry.git
 cd docker-registry
+cp vagrant_docker_registry/docker_registry/config.yml config/config.yml
 pip install .
 cd ..
 mv docker-registry /usr/local/docker-registry
 mkdir /var/log/docker-registry
 cp vagrant_docker_registry/docker_registry/docker-registry.conf /etc/init/docker-registry.conf
-cp /usr/local/docker-registry/config/config_sample.yml  /usr/local/docker-registry/config/config.yml
+#cp /usr/local/docker-registry/config/config_sample.yml  /usr/local/docker-registry/config/config.yml
 service docker-registry restart
 
 #Install Pyelasticsearch
@@ -116,4 +126,4 @@ update-rc.d nginx defaults
 # echo "####################################"
 # echo "Rebooting........"
 # echo "####################################"
-# #reboot
+#reboot
