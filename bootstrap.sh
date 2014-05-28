@@ -16,8 +16,6 @@ echo "####################################"
 apt-get -y install g++ python-dev zlib1g-dev libssl-dev libcurl4-openssl-dev libsasl2-modules python-setuptools libsasl2-dev make daemon
 apt-get -y install build-essential python-dev libevent-dev python-pip libssl-dev liblzma-dev libffi-dev redis-server python-novaclient
 apt-get -y install curl wget git-core mlocate tree unzip 
-cd /usr/local/lib/python2.7/dist-packages/
-rm -rf docker_registry*
 
 #Install Java & Maven
 echo "####################################"
@@ -25,7 +23,6 @@ echo "Installing JDK7 & Maven........"
 echo "####################################"
 apt-get -y install default-jdk
 java -version
-mvn --version
 
 #Clone Git repo containing config files
 echo "#######################################################################"
