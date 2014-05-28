@@ -56,15 +56,15 @@ echo "####################################"
 echo "Installing Docker registry........"
 echo "####################################"
 git clone https://github.com/dotcloud/docker-registry.git
-cd docker-registry
-cp vagrant_docker_registry/docker_registry/config.yml config/config.yml
-pip install .
-cd ..
 mv docker-registry /usr/local/docker-registry
+cp vagrant_docker_registry/docker_registry/config.yml /usr/local/docker-registry/config/config.yml
+pushd /usr/local/docker-registry
+pip install .
 mkdir /var/log/docker-registry
 cp vagrant_docker_registry/docker_registry/docker-registry.conf /etc/init/docker-registry.conf
 #cp /usr/local/docker-registry/config/config_sample.yml  /usr/local/docker-registry/config/config.yml
 service docker-registry restart
+popd
 
 #Install Pyelasticsearch
 echo "####################################"
