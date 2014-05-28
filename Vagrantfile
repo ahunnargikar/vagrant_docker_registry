@@ -13,7 +13,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = "saucy"
   config.vm.box_url = "http://cloud-images.ubuntu.com/vagrant/saucy/current/saucy-server-cloudimg-amd64-vagrant-disk1.box"
   config.vm.provision :shell, :path => "bootstrap.sh"
-  config.vm.synced_folder ".", "/vagrant"
 
   #host-only networking
   config.vm.network "private_network", ip: "192.168.57.101", :adapter => 2
