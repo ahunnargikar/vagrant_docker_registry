@@ -23,6 +23,10 @@ sed -i 's/docker1/docker3/g' /etc/nginx/app-servers.include
 sed -i 's/elasticsearch1/elasticsearch3/g' /etc/elasticsearch/elasticsearch.yml
 sed -i 's/192.168.57.101/192.168.57.103/g' /etc/elasticsearch/elasticsearch.yml
 
+#Disable services
+update-rc.d -f marathon remove
+echo "manual" >> /etc/init/marathon.conf
+
 echo "####################################"
 echo "Rebooting........"
 echo "####################################"

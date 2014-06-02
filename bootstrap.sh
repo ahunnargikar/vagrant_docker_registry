@@ -2,12 +2,15 @@
 
 apt-get update
 
+MESOS_VERSION=0.18.2
+PROTOBUF_VERSION=2.5.0
+
 #Set the hostname
 hostname docker1
 echo "docker1" > /etc/hostname
-echo "192.168.57.101    zookeeper1 nginx1 docker1 registry1 elasticsearch1 solr1" >> /etc/hosts
-echo "192.168.57.102    zookeeper2 nginx2 docker2 registry2 elasticsearch2 solr2" >> /etc/hosts
-echo "192.168.57.103    zookeeper3 nginx3 docker3 registry3 elasticsearch3 solr3" >> /etc/hosts
+echo "192.168.57.101    zookeeper1 nginx1 docker1 registry1 elasticsearch1 mesos1 marathon1" >> /etc/hosts
+echo "192.168.57.102    zookeeper2 nginx2 docker2 registry2 elasticsearch2 mesos2 marathon1" >> /etc/hosts
+echo "192.168.57.103    zookeeper3 nginx3 docker3 registry3 elasticsearch3 mesos3 marathon1" >> /etc/hosts
 
 #Install base packages
 echo "####################################"
@@ -29,8 +32,56 @@ echo "#######################################################################"
 echo "Cloning https://github.com/ahunnargikar/vagrant_docker_registry........"
 echo "#######################################################################"
 git clone https://github.com/ahunnargikar/vagrant_docker_registry
-pwd
-ls -l
+
+#Install Zookeeper
+echo "####################################"
+echo "Installing Zookeeper........"
+echo "####################################"
+apt-get -y install zookeeperd
+echo "1" > /etc/zookeeper/conf/myid
+cp vagrant_docker_registry/zookeeper/zoo.cfg /etc/zookeeper/conf/zoo.cfg
+
+#Install Mesos
+echo "####################################"
+echo "Installing Mesos........"
+echo "####################################"
+cp -rf vagrant_docker_registry/mesos/mesos-master /etc/mesos-master
+cp -rf vagrant_docker_registry/mesos/mesos-slave /etc/mesos-slave
+wget http://downloads.mesosphere.io/master/ubuntu/13.10/mesos_${MESOS_VERSION}_amd64.deb
+wget http://downloads.mesosphere.io/master/ubuntu/13.10/mesos-${MESOS_VERSION}-py2.7-linux-x86_64.egg
+dpkg -i mesos_${MESOS_VERSION}_amd64.deb
+easy_install mesos-${MESOS_VERSION}-py2.7-linux-x86_64.egg
+sed -i '/--recover=cleanup/d' /usr/bin/mesos-init-wrapper
+cp vagrant_docker_registry/mesos/mesos/zk /etc/mesos/zk
+
+#Install protobuf
+echo "###############################################"
+echo "Installing Protobuf ${PROTOBUF_VERSION}......."
+echo "###############################################"
+wget https://protobuf.googlecode.com/files/protobuf-${PROTOBUF_VERSION}.tar.gz
+tar -xzvf protobuf-${PROTOBUF_VERSION}.tar.gz; cd protobuf-${PROTOBUF_VERSION}/
+./configure
+make
+#make check
+make install
+ldconfig
+protoc --version
+cd ..
+
+#Install Marathon Framework
+echo "####################################"
+echo "Installing Marathon Framework......."
+echo "####################################"
+git clone https://github.com/mesosphere/marathon
+cd marathon
+protoc --java_out=src/main/java/ --proto_path=/usr/local/include/mesos/ --proto_path=src/main/proto/ src/main/proto/marathon.proto
+git status
+mvn package
+cd ..
+mv marathon /usr/local/marathon
+mkdir -p /etc/marathon
+cp vagrant_docker_registry/marathon/marathon.conf /etc/marathon/marathon.conf
+cp vagrant_docker_registry/marathon/marathon.init /etc/init/marathon.conf
 
 #Install Docker
 echo "####################################"
@@ -46,7 +97,7 @@ echo "##########################################"
 echo "Installing registry search modules........"
 echo "##########################################"
 cp -rf vagrant_docker_registry/modules/elasticsearchindex /usr/local/lib/python2.7/dist-packages/elasticsearchindex
-cp -rf vagrant_docker_registry/modules/solrindex /usr/local/lib/python2.7/dist-packages/solrindex
+#cp -rf vagrant_docker_registry/modules/solrindex /usr/local/lib/python2.7/dist-packages/solrindex
 
 #Install Docker registry
 echo "####################################"
@@ -58,7 +109,6 @@ cp vagrant_docker_registry/docker_registry/config.yml /usr/local/docker-registry
 pushd /usr/local/docker-registry
 pip install .
 mkdir /var/log/docker-registry
-#cp /usr/local/docker-registry/config/config_sample.yml  /usr/local/docker-registry/config/config.yml
 popd
 cp vagrant_docker_registry/docker_registry/docker-registry.conf /etc/init/docker-registry.conf
 service docker-registry restart
@@ -82,31 +132,31 @@ cp vagrant_docker_registry/elasticsearch/elasticsearch.yml /etc/elasticsearch/el
 /etc/init.d/elasticsearch restart
 /usr/share/elasticsearch/bin/plugin -install mobz/elasticsearch-head
 
-#Install Zookeeper
-echo "####################################"
-echo "Installing Zookeeper........"
-echo "####################################"
-apt-get -y install zookeeperd
-echo "1" > /etc/zookeeper/conf/myid
-cp vagrant_docker_registry/zookeeper/zoo.cfg /etc/zookeeper/conf/zoo.cfg
-
-#Install Solr
-echo "####################################"
-echo "Installing Solr........"
-echo "####################################"
-apt-get install -y tomcat7 tomcat7-docs tomcat7-admin
-cp vagrant_docker_registry/solr/tomcat-users.xml /etc/tomcat7/tomcat-users.xml
-wget http://www.gtlib.gatech.edu/pub/apache/lucene/solr/4.8.1/solr-4.8.1.zip
-unzip solr-4.8.1.zip
-mv solr-4.8.1 /usr/local/solr
-cp /usr/local/solr/example/lib/ext/* /usr/share/tomcat7/lib/
-cp /usr/local/solr/dist/solr-4.8.1.war /var/lib/tomcat7/webapps/solr.war
-cp -R /usr/local/solr/example/solr /var/lib/tomcat7/
-chown -R tomcat7:tomcat7 /var/lib/tomcat7/solr
-
-cp -rf vagrant_docker_registry/solr/docker_registry /var/lib/tomcat7/solr/docker_registry
-chown -R tomcat7:tomcat7 /var/lib/tomcat7/solr/docker_registry
-service tomcat7 restart
+# #Install Zookeeper
+# echo "####################################"
+# echo "Installing Zookeeper........"
+# echo "####################################"
+# apt-get -y install zookeeperd
+# echo "1" > /etc/zookeeper/conf/myid
+# cp vagrant_docker_registry/zookeeper/zoo.cfg /etc/zookeeper/conf/zoo.cfg
+# 
+# #Install Solr
+# echo "####################################"
+# echo "Installing Solr........"
+# echo "####################################"
+# apt-get install -y tomcat7 tomcat7-docs tomcat7-admin
+# cp vagrant_docker_registry/solr/tomcat-users.xml /etc/tomcat7/tomcat-users.xml
+# wget http://www.gtlib.gatech.edu/pub/apache/lucene/solr/4.8.1/solr-4.8.1.zip
+# unzip solr-4.8.1.zip
+# mv solr-4.8.1 /usr/local/solr
+# cp /usr/local/solr/example/lib/ext/* /usr/share/tomcat7/lib/
+# cp /usr/local/solr/dist/solr-4.8.1.war /var/lib/tomcat7/webapps/solr.war
+# cp -R /usr/local/solr/example/solr /var/lib/tomcat7/
+# chown -R tomcat7:tomcat7 /var/lib/tomcat7/solr
+# 
+# cp -rf vagrant_docker_registry/solr/docker_registry /var/lib/tomcat7/solr/docker_registry
+# chown -R tomcat7:tomcat7 /var/lib/tomcat7/solr/docker_registry
+# service tomcat7 restart
 
 #Install & configure Nginx
 echo "####################################"

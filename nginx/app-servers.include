@@ -15,3 +15,15 @@ upstream backend3 {
    ip_hash;
    server docker1:8080;
 }
+
+#Marathon
+upstream backend4 {
+    ip_hash;
+	server docker1:8086;
+}
+
+#Mesos
+upstream backend5 {
+   ip_hash;
+   server docker1:5050;
+}
