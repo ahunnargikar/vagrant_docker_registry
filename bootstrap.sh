@@ -24,7 +24,7 @@ apt-get -y install curl wget git-core mlocate tree unzip
 echo "####################################"
 echo "Installing JDK7 & Maven........"
 echo "####################################"
-apt-get -y install default-jdk
+apt-get -y install default-jdk maven
 java -version
 
 #Clone Git repo containing config files
