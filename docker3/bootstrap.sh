@@ -13,6 +13,10 @@ cd vagrant_docker_registry
 git pull
 cd ..
 
+#Copy over the slave-specific configs
+cp -rf vagrant_docker_registry/docker3/mesos/mesos-master/* /etc/mesos-master
+cp -rf vagrant_docker_registry/docker3/mesos/mesos-slave/* /etc/mesos-slave
+
 #Zookeeper
 echo "3" > /etc/zookeeper/conf/myid
 
