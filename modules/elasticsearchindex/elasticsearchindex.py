@@ -156,6 +156,7 @@ class Index (Index):
         """
         Extract the Github URL packaged inside the MAINTAINER
         command specified in the Dockerfile for this image layer
+        Ex. 
 
         @type  list: List
         @param list: List containing the command that generated this image layer
